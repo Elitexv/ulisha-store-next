@@ -100,7 +100,7 @@ export async function middleware(request: NextRequest) {
 
   const isBot = bots.some((bot) => userAgent.toLowerCase().includes(bot));
   const isPrerender = request.headers.get("x-prerender");
-  const url = new URL(request.url);
+  const url = request.nextUrl;
   const pathname = url.pathname;
 
   const extension = pathname.includes(".")
@@ -117,7 +117,7 @@ export async function middleware(request: NextRequest) {
 
   try {
     // Build the prerender.io URL with pathname and search params only (avoid duplicating protocol/host)
-    const prerenderURL = `https://service.prerender.io${pathname}${url.search}`;
+    const prerenderURL = `http://service.prerender.io/${url.href}`;
 
     const prerenderHeaders = new Headers(request.headers);
     prerenderHeaders.set(
@@ -139,7 +139,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(prerenderResponse.body, {
       status: prerenderResponse.status,
       statusText: prerenderResponse.statusText,
-      headers: responseHeaders,
+      headers: responseHeaders, 
     });
   } catch (error) {
     console.error("Prerender fetch error:", error);
